@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,70 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User{
+    userId              Int     @id @default(autoincrement())
+    clerkId             String  @unique
+    firstName           String
+    lastName            String
+    birthday            DateTime?
+    bio                 String
+    gender              String
+    university          String
+    company             String
+    workPosition        String
+    workZipcode         String
+    internshipStartDate DateTime
+    internshipEndDate   DateTime
+    schoolMajor         String
+    isLookingForHousing Boolean
+    sleepSchedule       String?
+    numOfRoomates       Int?
+    noiseLevel          String?
+    budgetRange         Int?
+    instagram           String?
+    linkedin            String?
+    github              String?
+    facebook            String?
+    forums              Forum[]
+    events              Event[]
+    traits              Trait[]
+    hobbies             Hobby[]
+}
+
+model Forum{
+    forumId             Int         @id @default(autoincrement())
+    category            String
+    title               String
+    textContent         String
+    imgUrl              String?
+    createdAt           DateTime    @default(now())
+    upvotes             Int         
+    userId              Int
+    user                User        @relation(fields: [userId], references: [userId])
+}
+
+model Event{
+    eventId             Int         @id @default(autoincrement())
+    category            String      
+    location            String
+    dateTime            DateTime
+    imgUrl            String?
+    userId              Int
+    user                User        @relation(fields: [userId], references: [userId])
+}
+
+model Trait{
+    traitId             Int         @id @default(autoincrement())
+    trait               String
+    userId              Int
+    users                User[]    
+}
+
+model Hobby{
+    hobbyId             Int         @id @default(autoincrement())
+    hobby               String
+    userId              Int
+    users                User[]        
 }
