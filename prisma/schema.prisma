@@ -9,7 +9,7 @@ datasource db {
 
 model User{
     userId              Int     @id @default(autoincrement())
-    clerkId             String  @unique
+    clerkId             String  
     firstName           String
     lastName            String
     birthday            DateTime?
@@ -54,7 +54,8 @@ model Event{
     category            String      
     location            String
     dateTime            DateTime
-    imgUrl            String?
+    description         String
+    imgUrl              String?
     userId              Int
     user                User        @relation(fields: [userId], references: [userId])
 }
