@@ -1,14 +1,20 @@
-require('dotenv').config();
-const express = require('express');
+require('dotenv/config')
+const express = require('express')
+const { clerkClient, requireAuth, getAuth } = require('@clerk/express')
 
-const app = express();
+const app = express()
+const PORT = 3000
 
-const PORT = 3000;
+app.use(requireAuth())
 
-app.use(express.json());
+app.get('/protected', requireAuth(), async (req, res) => {
+    const { userId } = getAuth(req)
 
-app.get('/', (req, res) => {
-    res.send("Hello world!")
+    const user = await clerkClient.users.getUser(userId)
+
+    return res.json({ user })
 })
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT} 🚀`));
+app.listen(PORT, () => {
+    console.log(`Testing listening at: http://localhost:${PORT}`)
+})
