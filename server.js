@@ -1,18 +1,24 @@
 require('dotenv/config')
 const express = require('express')
 const { clerkClient, requireAuth, getAuth } = require('@clerk/express')
+const neighborhoodRoutes = require("./src/routes/neighborhoodRoutes");
 
 const app = express()
 const PORT = 3000
 
-app.use(requireAuth())
+app.use(express.json())
 
 app.get('/protected', requireAuth(), async (req, res) => {
     const { userId } = getAuth(req)
+    res.json({userId})
+})
 
-    const user = await clerkClient.users.getUser(userId)
+app.use("/api/neighborhoods", neighborhoodRoutes);
 
-    return res.json({ user })
+app.get('/', requireAuth(), async (req, res) => {
+    const { userId } = getAuth(req);
+    const user = await clerkClient.users.getUser(userId);
+    return res.json({ user });
 })
 
 app.listen(PORT, () => {
