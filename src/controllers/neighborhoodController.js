@@ -13,6 +13,7 @@ exports.getNeighborhoodData = async (req, res) => {
         'bikeDescription': '',
         'transitScore': '',
         'transitDescription': '',
+        'places' : []
     };
     try {
         const {query} = req.query;
@@ -43,6 +44,35 @@ exports.getNeighborhoodData = async (req, res) => {
         
         output.transitScore = metricsData.transit?.score || 'N/A';
         output.transitDescription = metricsData.transit?.description || 'N/A';
+
+        //Find nearby places
+        const placesURL = 'https://places.googleapis.com/v1/places:searchNearby';
+        const { data : placesData } = await axios.post(placesURL, {
+            maxResultCount: 10,
+            locationRestriction: {
+                circle: {
+                    center : {
+                        latitude: output.latitude,
+                        longitude: output.longitude
+                    },
+                    radius: 500.0
+                }
+            },
+            rankPreference: "POPULARITY"
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-Api-Key': mapsKey,
+                'X-Goog-FieldMask': 'places.displayName,places.formattedAddress'
+            }
+        });
+
+        //Process places data
+        output.places = placesData.places.map(place => ({
+            name: place.displayName.text,
+            address: place.formattedAddress
+        }))
+
         
         const reverseURL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${output.latitude},%20${output.longitude}&result_type=neighborhood&key=${mapsKey}`
         const response = await axios.get(reverseURL);
