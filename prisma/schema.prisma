@@ -63,13 +63,11 @@ model Event{
 model Trait{
     traitId             Int         @id @default(autoincrement())
     trait               String
-    userId              Int
     users                User[]    
 }
 
 model Hobby{
     hobbyId             Int         @id @default(autoincrement())
     hobby               String
-    userId              Int
     users                User[]        
 }
