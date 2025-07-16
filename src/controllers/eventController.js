@@ -26,7 +26,7 @@ const prisma = require ('../db/prismaClient')
 //Returns events based on sorting and filtering
 const getEvents = async(req,res) =>{
     const {category, searchTerm}= req.query
-    const limit =20
+    const limit = 20
     const skip = 20
 
     // List / objects of conditions for filtering
