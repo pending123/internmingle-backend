@@ -8,7 +8,6 @@ const createProfile = async (req, res) =>{
         lastName,
         birthday,
         bio,
-        gender,
         university,
         company,
         workPosition,
@@ -40,8 +39,8 @@ const createProfile = async (req, res) =>{
             where: { clerkId: clerkUserId }
         });
 
-        if (existingUser){
-            return res.status(400).json({ error: 'Profile already exists'});
+        if (!existingUser){
+            return res.status(400).json({ error: 'user not found'});
         }
 
         if (existingUser.profileCompleted) {
@@ -49,7 +48,7 @@ const createProfile = async (req, res) =>{
         }
 
         //makes sure required fields are entered
-        if (!firstName || !lastName || !bio || !gender || !university || !company ||
+        if (!firstName || !lastName || !bio || !university || !company ||
             !workPosition || !workZipcode || !workCity || !internshipStartDate || !internshipEndDate || !schoolMajor){
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
@@ -59,13 +58,12 @@ const createProfile = async (req, res) =>{
         }
         //update user prof
         const updatedProfile = await prisma.user.update({
+            where: { clerkId: clerkUserId },
             data:{
-                clerkId: clerkUserId,
                 firstName,
                 lastName,
                 birthday: birthday ? new Date(birthday) : null,
                 bio,
-                gender,
                 university,
                 company,
                 workPosition,
@@ -119,7 +117,6 @@ const getProfileById = async (req, res) =>{
             lastName: profile.lastName,
             birthday: profile.birthday,
             bio: profile.bio,
-            gender: profile.gender,
             university: profile.university,
             company: profile.company,
             workPosition: profile.workPosition,

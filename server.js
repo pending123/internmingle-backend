@@ -9,11 +9,14 @@ const { webhookHandler } = require('./src/controllers/clerkWebhooks');
 const app = express()
 const PORT = 3000
 
-app.use('/webhook/clerk', express.raw({ type: 'application/json' }));
+//TEMP__TESTING
+app.post('/api/webhooks', express.raw({ type: 'application/json' }), webhookHandler);
+
+//app.use('/api/webhooks', express.raw({ type: 'application/json' }));
 
 app.use(express.json())
 
-app.post ('/webhook/clerk', webhookHandler);
+//app.post ('/api/webhooks', webhookHandler);
 
 app.get('/protected', requireAuth(), async (req, res) => {
     const { userId } = getAuth(req)
