@@ -6,6 +6,12 @@ const profileRoutes = require('./src/routes/profileRoutes');
 const { webhookHandler } = require('./src/controllers/clerkWebhooks');
 
 
+const cors = require("cors");
+
+const corsOption = {
+  origin: "http://localhost:5173",
+};
+
 const app = express()
 const PORT = 3000
 
@@ -15,6 +21,7 @@ app.post('/api/webhooks', express.raw({ type: 'application/json' }), webhookHand
 //app.use('/api/webhooks', express.raw({ type: 'application/json' }));
 
 app.use(express.json())
+app.use(cors(corsOption));
 
 //app.post ('/api/webhooks', webhookHandler);
 
