@@ -7,38 +7,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  userId              Int       @id @default(autoincrement())
-  clerkId             String    @unique
-  firstName           String?
-  lastName            String?
-  birthday            DateTime?
-  bio                 String
-  university          String?
-  company             String?
-  workPosition        String?
-  workZipcode         String?
-  workCity            Int?
-  internshipStartDate DateTime?
-  internshipEndDate   DateTime?
-  schoolMajor         String?
-  isLookingForHousing Boolean?
-  sleepSchedule       String?
-  numOfRoomates       Int?
-  noiseLevel          String?
-  budgetRange         Int?
-  instagram           String?
-  linkedin            String?
-  github              String?
-  facebook            String?
-  events              Event[]
-  forums              Forum[]
-  hobbies             Hobby[]   @relation("HobbyToUser")
-  traits              Trait[]   @relation("TraitToUser")
 
-  @@index([clerkId])
-  @@index([workCity])
-  @@index([isLookingForHousing])
+model User{
+    userId              Int     @id @default(autoincrement())
+    clerkId             String  
+    firstName           String?
+    lastName            String?
+    birthday            DateTime?
+    bio                 String?
+    gender              String?
+    university          String?
+    company             String?
+    workPosition        String?
+    workZipcode         String?
+    internshipStartDate DateTime?
+    internshipEndDate   DateTime?
+    schoolMajor         String?
+    isLookingForHousing Boolean?
+    sleepSchedule       String?
+    numOfRoomates       Int?
+    noiseLevel          String?
+    budgetRange         Int?
+    instagram           String?
+    linkedin            String?
+    github              String?
+    facebook            String?
+
+    @@index([clerkId])
+    @@index([workCity])
+    @@index([isLookingForHousing])
+
+
 }
 
 model Forum {
@@ -64,16 +63,33 @@ model Event {
   user        User     @relation(fields: [userId], references: [userId])
 }
 
-model Trait {
-  traitId Int    @id @default(autoincrement())
-  trait   String
-  userId  Int
-  users   User[] @relation("TraitToUser")
+
+model Trait{
+    traitId             Int         @id @default(autoincrement())
+    trait               String
 }
 
-model Hobby {
-  hobbyId Int    @id @default(autoincrement())
-  hobby   String
-  userId  Int
-  users   User[] @relation("HobbyToUser")
+model Hobby{
+    hobbyId             Int         @id @default(autoincrement())
+    hobby               String
 }
+
+model UserTrait {
+  userId      Int   
+  traitId     Int      
+
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  trait       Trait     @relation(fields: [traitId], references: [traitId], onDelete: Cascade)
+
+
+}
+
+model UserHobby {
+  userId      Int    
+  hobbyId     Int       
+
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  hobby       Hobby     @relation(fields: [hobbyId], references: [hobbyId], onDelete: Cascade)
+
+}
+

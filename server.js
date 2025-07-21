@@ -1,3 +1,4 @@
+
 require('dotenv/config')
 const express = require('express')
 const { clerkClient, requireAuth, getAuth } = require('@clerk/express')
@@ -8,6 +9,8 @@ const { webhookHandler } = require('./src/controllers/clerkWebhooks');
 
 const cors = require("cors");
 
+const eventRoutes = require("./src/routes/eventRoutes")
+  
 const corsOption = {
   origin: "http://localhost:5173",
 };
@@ -22,6 +25,7 @@ app.post('/api/webhooks', express.raw({ type: 'application/json' }), webhookHand
 
 app.use(express.json())
 app.use(cors(corsOption));
+app.use("/", eventRoutes)
 
 //app.post ('/api/webhooks', webhookHandler);
 
@@ -38,8 +42,3 @@ app.get('/', requireAuth(), async (req, res) => {
     const { userId } = getAuth(req);
     const user = await clerkClient.users.getUser(userId);
     return res.json({ user });
-})
-
-app.listen(PORT, () => {
-    console.log(`Testing listening at: http://localhost:${PORT}`)
-})

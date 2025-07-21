@@ -71,9 +71,10 @@ const getEvents = async(req,res) =>{
 const getEventById = async(req,res) =>{
     const {id} = req.params
     try{
-        const event = await prisma.board.findUnique({
+        const event = await prisma.event.findUnique({
             where:{eventId: parseInt(id)}
     })
+    res.json(event)
     }catch(error){
         console.error("Error fetching event: ", error)
     }
