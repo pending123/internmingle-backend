@@ -10,19 +10,19 @@ datasource db {
 model User{
     userId              Int     @id @default(autoincrement())
     clerkId             String  
-    firstName           String
-    lastName            String
+    firstName           String?
+    lastName            String?
     birthday            DateTime?
-    bio                 String
-    gender              String
-    university          String
-    company             String
-    workPosition        String
-    workZipcode         String
-    internshipStartDate DateTime
-    internshipEndDate   DateTime
-    schoolMajor         String
-    isLookingForHousing Boolean
+    bio                 String?
+    gender              String?
+    university          String?
+    company             String?
+    workPosition        String?
+    workZipcode         String?
+    internshipStartDate DateTime?
+    internshipEndDate   DateTime?
+    schoolMajor         String?
+    isLookingForHousing Boolean?
     sleepSchedule       String?
     numOfRoomates       Int?
     noiseLevel          String?
@@ -31,10 +31,11 @@ model User{
     linkedin            String?
     github              String?
     facebook            String?
-    forums              Forum[]
-    events              Event[]
-    traits              Trait[]
-    hobbies             Hobby[]
+
+    @@index([clerkId])
+    @@index([workCity])
+    @@index([isLookingForHousing])
+
 }
 
 model Forum{
@@ -63,11 +64,28 @@ model Event{
 model Trait{
     traitId             Int         @id @default(autoincrement())
     trait               String
-    users                User[]    
 }
 
 model Hobby{
     hobbyId             Int         @id @default(autoincrement())
     hobby               String
-    users                User[]        
+}
+
+model UserTrait {
+  userId      Int   
+  traitId     Int      
+
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  trait       Trait     @relation(fields: [traitId], references: [traitId], onDelete: Cascade)
+
+
+}
+
+model UserHobby {
+  userId      Int    
+  hobbyId     Int       
+
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  hobby       Hobby     @relation(fields: [hobbyId], references: [hobbyId], onDelete: Cascade)
+
 }
