@@ -20,6 +20,7 @@ model User{
     company             String?
     workPosition        String?
     workZipcode         String?
+    workCity            String?
     internshipStartDate DateTime?
     internshipEndDate   DateTime?
     schoolMajor         String?
