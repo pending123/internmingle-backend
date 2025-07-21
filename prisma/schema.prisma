@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User{
     userId              Int     @id @default(autoincrement())
     clerkId             String  
@@ -36,30 +37,32 @@ model User{
     @@index([workCity])
     @@index([isLookingForHousing])
 
+
 }
 
-model Forum{
-    forumId             Int         @id @default(autoincrement())
-    category            String
-    title               String
-    textContent         String
-    imgUrl              String?
-    createdAt           DateTime    @default(now())
-    upvotes             Int         
-    userId              Int
-    user                User        @relation(fields: [userId], references: [userId])
+model Forum {
+  forumId     Int      @id @default(autoincrement())
+  category    String
+  title       String
+  textContent String
+  imgUrl      String?
+  createdAt   DateTime @default(now())
+  upvotes     Int
+  userId      Int
+  user        User     @relation(fields: [userId], references: [userId])
 }
 
-model Event{
-    eventId             Int         @id @default(autoincrement())
-    category            String      
-    location            String
-    dateTime            DateTime
-    description         String
-    imgUrl              String?
-    userId              Int
-    user                User        @relation(fields: [userId], references: [userId])
+model Event {
+  eventId     Int      @id @default(autoincrement())
+  category    String
+  location    String
+  dateTime    DateTime
+  imgUrl      String?
+  userId      Int
+  description String
+  user        User     @relation(fields: [userId], references: [userId])
 }
+
 
 model Trait{
     traitId             Int         @id @default(autoincrement())
@@ -89,3 +92,4 @@ model UserHobby {
   hobby       Hobby     @relation(fields: [hobbyId], references: [hobbyId], onDelete: Cascade)
 
 }
+
