@@ -2,6 +2,8 @@ const axios = require('axios');
 const mapsKey = process.env.MAPS_API_KEY;
 const walkscoreKey = process.env.WALKSCORE_API_KEY;
 
+const snaketoTitleCase = require('../../utils/textFormatter')
+
 exports.getNeighborhoodData = async (req, res) => {
     let output = {
         'neighborhood': '',
@@ -46,6 +48,7 @@ exports.getNeighborhoodData = async (req, res) => {
         output.transitDescription = metricsData.transit?.description || 'N/A';
 
         //Find nearby places
+
         const placesURL = 'https://places.googleapis.com/v1/places:searchNearby';
         const { data : placesData } = await axios.post(placesURL, {
             maxResultCount: 10,
@@ -63,16 +66,16 @@ exports.getNeighborhoodData = async (req, res) => {
             headers: {
                 'Content-Type': 'application/json',
                 'X-Goog-Api-Key': mapsKey,
-                'X-Goog-FieldMask': 'places.displayName,places.formattedAddress'
+                'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.primaryTypeDisplayName,places.types'
             }
         });
 
         //Process places data
         output.places = placesData.places.map(place => ({
             name: place.displayName.text,
-            address: place.formattedAddress
+            address: place.formattedAddress,
+            category: place.primaryTypeDisplayName?.text ? place.primaryTypeDisplayName.text : snaketoTitleCase(place.types[0]),
         }))
-
         
         const reverseURL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${output.latitude},%20${output.longitude}&result_type=neighborhood&key=${mapsKey}`
         const response = await axios.get(reverseURL);
