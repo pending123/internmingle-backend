@@ -42,3 +42,4 @@ app.get('/', requireAuth(), async (req, res) => {
     const { userId } = getAuth(req);
     const user = await clerkClient.users.getUser(userId);
     return res.json({ user });
+})

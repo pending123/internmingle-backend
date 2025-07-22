@@ -11,6 +11,7 @@ datasource db {
 model User{
     userId              Int     @id @default(autoincrement())
     clerkId             String  
+    profileCompleted    Boolean?   @default(false)
     firstName           String?
     lastName            String?
     birthday            DateTime?
@@ -20,6 +21,7 @@ model User{
     company             String?
     workPosition        String?
     workZipcode         String?
+    workCity            String?
     internshipStartDate DateTime?
     internshipEndDate   DateTime?
     schoolMajor         String?
@@ -32,6 +34,12 @@ model User{
     linkedin            String?
     github              String?
     facebook            String?
+    forums              Forum[]
+    events              Event[]   
+
+    userTraits            UserTrait[]  
+    userHobbies           UserHobby[]  
+
 
     @@index([clerkId])
     @@index([workCity])
@@ -67,29 +75,33 @@ model Event {
 model Trait{
     traitId             Int         @id @default(autoincrement())
     trait               String
+    
+    userTraits          UserTrait[]
 }
 
 model Hobby{
     hobbyId             Int         @id @default(autoincrement())
     hobby               String
+    
+    userHobbies         UserHobby[]
 }
 
 model UserTrait {
-  userId      Int   
-  traitId     Int      
+    userId      Int   
+    traitId     Int      
 
-  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  trait       Trait     @relation(fields: [traitId], references: [traitId], onDelete: Cascade)
+    user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+    trait       Trait     @relation(fields: [traitId], references: [traitId], onDelete: Cascade)
 
-
+    @@id([userId, traitId])
 }
 
 model UserHobby {
-  userId      Int    
-  hobbyId     Int       
+    userId      Int    
+    hobbyId     Int       
 
-  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  hobby       Hobby     @relation(fields: [hobbyId], references: [hobbyId], onDelete: Cascade)
-
+    user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+    hobby       Hobby     @relation(fields: [hobbyId], references: [hobbyId], onDelete: Cascade)
+    @@id([userId, hobbyId])
 }
 
