@@ -8,6 +8,7 @@ const createProfile = async (req, res) =>{
         lastName,
         birthday,
         bio,
+        gender,
         university,
         company,
         workPosition,
@@ -48,13 +49,13 @@ const createProfile = async (req, res) =>{
         }
 
         //makes sure required fields are entered
-        if (!firstName || !lastName || !bio || !university || !company ||
+        if (!firstName || !lastName || !bio || !university || !company || !gender ||
             !workPosition || !workZipcode || !workCity || !internshipStartDate || !internshipEndDate || !schoolMajor){
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
 
         if (isLookingForHousing && (!sleepSchedule || !numOfRoomates || !noiseLevel || !budgetRange)) {
-            return res.status(400).json({error: 'Housing preferences are required when looking for roommates'});
+            return res.status(400).json({error: 'Housing preferences are required when looking for roomates'});
         }
         //update user prof
         const updatedProfile = await prisma.user.update({
@@ -64,6 +65,7 @@ const createProfile = async (req, res) =>{
                 lastName,
                 birthday: birthday ? new Date(birthday) : null,
                 bio,
+                gender,
                 university,
                 company,
                 workPosition,
@@ -117,6 +119,7 @@ const getProfileById = async (req, res) =>{
             lastName: profile.lastName,
             birthday: profile.birthday,
             bio: profile.bio,
+            gender: profile.gender,
             university: profile.university,
             company: profile.company,
             workPosition: profile.workPosition,
@@ -126,7 +129,7 @@ const getProfileById = async (req, res) =>{
             schoolMajor: profile.schoolMajor,
             isLookingForHousing: profile.isLookingForHousing,
             sleepSchedule: profile.isLookingForHousing ? profile.sleepSchedule : null,
-            numOfRoommates: profile.isLookingForHousing ? profile.numOfRoomates : null,
+            numOfRoomates: profile.isLookingForHousing ? profile.numOfRoomates : null,
             noiseLevel: profile.isLookingForHousing ? profile.noiseLevel : null,
             budgetRange: profile.isLookingForHousing ? profile.budgetRange : null,
             traits: profile.traits,
@@ -159,6 +162,7 @@ const getProfiles = async (req, res) => {
             firstName: profile.firstName,
             lastName: profile.lastName,
             bio: profile.bio,
+            gender: profile.gender,
             university: profile.university,
             company: profile.company,
             workPosition: profile.workPosition,
@@ -221,6 +225,7 @@ const updateCurrentUserProfile = async (req, res) => {
         workZipcode,
         workPosition,
         bio,
+        gender,
         isLookingForHousing,
         budgetRange,
         sleepSchedule,
@@ -255,6 +260,7 @@ const updateCurrentUserProfile = async (req, res) => {
         if (workZipcode !== undefined) updateData.workZipcode = workZipcode;
         if (workPosition !== undefined) updateData.workPosition = workPosition;
         if (bio !== undefined) updateData.bio = bio;
+        if (gender !== undefined) updateData.gender = gender;
         if (isLookingForHousing !== undefined) {
             updateData.isLookingForHousing = isLookingForHousing;
             if (!isLookingForHousing) {
