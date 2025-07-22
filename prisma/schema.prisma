@@ -10,7 +10,7 @@ datasource db {
 
 model User{
     userId              Int     @id @default(autoincrement())
-    clerkId             String  
+    clerkId             String
     profileCompleted    Boolean?   @default(false)
     firstName           String?
     lastName            String?
