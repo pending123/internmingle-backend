@@ -11,6 +11,7 @@ const eventRoutes = require("./src/routes/eventRoutes");
 
 const corsOption = {
   origin: "http://localhost:5173",
+  credentials: true //test
 };
 
 const app = express();
