@@ -24,10 +24,10 @@ const prisma = require("../db/prismaClient");
 // }
 
 //Returns events based on sorting and filtering
-const getEvents = async (req, res) => {
-  const { category, searchTerm } = req.query;
-  const limit = 20;
-  const skip = 20;
+const getEvents = async(req,res) =>{
+    const {category, searchTerm}= req.query
+    const limit = 20
+    const skip = 20
 
   // List / objects of conditions for filtering
   const whereConditions = {
@@ -67,17 +67,17 @@ const getEvents = async (req, res) => {
 };
 
 //Gets event by ID
-const getEventById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const event = await prisma.event.findUnique({
-      where: { eventId: parseInt(id) },
-    });
-    res.json(event);
-  } catch (error) {
-    console.error("Error fetching event: ", error);
-  }
-};
+const getEventById = async(req,res) =>{
+    const {id} = req.params
+    try{
+        const event = await prisma.event.findUnique({
+            where:{eventId: parseInt(id)}
+    })
+    res.json(event)
+    }catch(error){
+        console.error("Error fetching event: ", error)
+    }
+}
 
 //Creates new event
 const createEvent = async (req, res) => {

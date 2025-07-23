@@ -7,22 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User{
     userId              Int     @id @default(autoincrement())
-    clerkId             String  
-    firstName           String
-    lastName            String
+    clerkId             String
+    profileCompleted    Boolean?   @default(false)
+    firstName           String?
+    lastName            String?
     birthday            DateTime?
-    bio                 String
-    gender              String
-    university          String
-    company             String
-    workPosition        String
-    workZipcode         String
-    internshipStartDate DateTime
-    internshipEndDate   DateTime
-    schoolMajor         String
-    isLookingForHousing Boolean
+    bio                 String?
+    gender              String?
+    university          String?
+    company             String?
+    workPosition        String?
+    workZipcode         String?
+    workCity            String?
+    internshipStartDate DateTime?
+    internshipEndDate   DateTime?
+    schoolMajor         String?
+    isLookingForHousing Boolean?
     sleepSchedule       String?
     numOfRoomates       Int?
     noiseLevel          String?
@@ -32,21 +35,29 @@ model User{
     github              String?
     facebook            String?
     forums              Forum[]
-    events              Event[]
-    traits              Trait[]
-    hobbies             Hobby[]
+    events              Event[]   
+
+    userTraits            UserTrait[]  
+    userHobbies           UserHobby[]  
+
+
+    @@index([clerkId])
+    @@index([workCity])
+    @@index([isLookingForHousing])
+
+
 }
 
-model Forum{
-    forumId             Int         @id @default(autoincrement())
-    category            String
-    title               String
-    textContent         String
-    imgUrl              String?
-    createdAt           DateTime    @default(now())
-    upvotes             Int         
-    userId              Int
-    user                User        @relation(fields: [userId], references: [userId])
+model Forum {
+  forumId     Int      @id @default(autoincrement())
+  category    String
+  title       String
+  textContent String
+  imgUrl      String?
+  createdAt   DateTime @default(now())
+  upvotes     Int
+  userId      Int
+  user        User     @relation(fields: [userId], references: [userId])
 }
 
 model Event {
@@ -61,16 +72,37 @@ model Event {
   user        User     @relation(fields: [userId], references: [userId])
 }
 
+
 model Trait{
     traitId             Int         @id @default(autoincrement())
     trait               String
-    userId              Int
-    users                User[]    
+    
+    userTraits          UserTrait[]
 }
 
 model Hobby{
     hobbyId             Int         @id @default(autoincrement())
     hobby               String
-    userId              Int
-    users                User[]        
+    
+    userHobbies         UserHobby[]
 }
+
+model UserTrait {
+    userId      Int   
+    traitId     Int      
+
+    user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+    trait       Trait     @relation(fields: [traitId], references: [traitId], onDelete: Cascade)
+
+    @@id([userId, traitId])
+}
+
+model UserHobby {
+    userId      Int    
+    hobbyId     Int       
+
+    user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+    hobby       Hobby     @relation(fields: [hobbyId], references: [hobbyId], onDelete: Cascade)
+    @@id([userId, hobbyId])
+}
+
