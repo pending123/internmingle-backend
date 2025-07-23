@@ -68,7 +68,7 @@ const createProfile = async (req, res) => {
 
         // Validate required fields
         if (!firstName || !lastName || !bio || !university || !company || !gender ||
-            !workPosition || !workZipcode || !workCity || !internshipStartDate || !internshipEndDate || !schoolMajor) {
+            !workPosition || !workCity || !internshipStartDate || !internshipEndDate || !schoolMajor) {
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
 
@@ -89,7 +89,7 @@ const createProfile = async (req, res) => {
                 university,
                 company,
                 workPosition,
-                workZipcode,
+                workZipcode: workZipcode || null,
                 workCity,
                 internshipStartDate: new Date(internshipStartDate),
                 internshipEndDate: new Date(internshipEndDate),
@@ -219,7 +219,7 @@ const getProfiles = async (req, res) => {
 };
 
 const getCurrentUserProfile = async (req, res) => {
-    const { userId: clerkUserId } = req.auth;
+    const { userId: clerkUserId } = req.auth();
 
     if (!clerkUserId) {
         return res.status(401).json({ error: 'User not authenticated' });
@@ -258,7 +258,7 @@ const getCurrentUserProfile = async (req, res) => {
 };
 
 const updateCurrentUserProfile = async (req, res) => {
-    const { userId: clerkUserId } = req.auth;
+    const { userId: clerkUserId } = req.auth();
     const {
         university,
         company,
@@ -353,7 +353,7 @@ const updateCurrentUserProfile = async (req, res) => {
 };
 
 const deleteCurrentUserProfile = async (req, res) => {
-    const { userId: clerkUserId } = req.auth;
+    const { userId: clerkUserId } = req.auth();
 
     if (!clerkUserId) {
         return res.status(401).json({ error: 'User not authenticated' });

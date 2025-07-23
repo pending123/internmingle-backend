@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('@clerk/express');
+const { requireAuth  } = require('@clerk/express');
 const profileController = require('../controllers/profileController');
 
 //create a new user profile
