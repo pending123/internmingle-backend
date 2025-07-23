@@ -49,15 +49,16 @@ model Forum{
     user                User        @relation(fields: [userId], references: [userId])
 }
 
-model Event{
-    eventId             Int         @id @default(autoincrement())
-    category            String      
-    location            String
-    dateTime            DateTime
-    description         String
-    imgUrl              String?
-    userId              Int
-    user                User        @relation(fields: [userId], references: [userId])
+model Event {
+  eventId     Int      @id @default(autoincrement())
+  title       String
+  category    String
+  location    String
+  dateTime    DateTime
+  imgUrl      String?
+  userId      Int
+  description String
+  user        User     @relation(fields: [userId], references: [userId])
 }
 
 model Trait{
