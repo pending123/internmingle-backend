@@ -50,23 +50,26 @@ const handleUserCreated = async (userData) => {
     try {
         const {id: clerkId, first_name, last_name } = userData;
 
-        console.log(`Processing user.created webhook for CLerk ID: ${clerkId}`);
-
+        console.log(`Processing user.created webhook for Clerk ID: ${clerkId}`);
+        console.log('Full user data:', userData); // Add this for debugging
 
         //for webhook testing
         const firstName = first_name || 'user';
         const lastName = last_name || '';
-        //creates basic user when signing up. profile will be 100% complete after onboarding
+
+        //creates basic user when signing up
+        //profile will be 100% complete after onboarding
         const user = await prisma.user.create({
             data: {
                 clerkId: clerkId,
-                firstName: first_name,
-                lastName: last_name,
+                firstName: firstName,
+                lastName: lastName,
                 bio: '',
                 profileCompleted: false
             }
         });
         console.log(`created user record for Clerk Id: ${clerkId}`);
+        console.log('Created user:', user); // Add this for debugging
     } catch (error){
         console.error('error creating user:', error);
         throw error;

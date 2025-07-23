@@ -34,32 +34,52 @@ const createProfile = async (req, res) => {
     }
 
     try {
-        // Check if user profile exists already and profile is completed already
-        const existingUser = await prisma.user.findUnique({
+        // Check if user profile exists already
+        let existingUser = await prisma.user.findFirst({
             where: { clerkId: clerkUserId }
         });
 
+        // If no existing user, create one (handles webhook failure edge case)
         if (!existingUser) {
-            return res.status(400).json({ error: 'user not found' });
+            try {
+                // Get user details from Clerk to create basic profile
+                const clerkUser = await clerkClient.users.getUser(clerkUserId);
+                
+                existingUser = await prisma.user.create({
+                    data: {
+                        clerkId: clerkUserId,
+                        firstName: clerkUser.firstName || '',
+                        lastName: clerkUser.lastName || '',
+                        bio: '',
+                        profileCompleted: false
+                    }
+                });
+                console.log(`Created user record for Clerk ID: ${clerkUserId}`);
+            } catch (createError) {
+                console.error('Error creating user:', createError);
+                return res.status(500).json({ error: 'Failed to create user record' });
+            }
         }
 
+        // Check if profile is already completed
         if (existingUser.profileCompleted) {
-            return res.status(400).json({ error: 'profile already completed' });
+            return res.status(400).json({ error: 'Profile already completed' });
         }
 
-        // Makes sure required fields are entered
+        // Validate required fields
         if (!firstName || !lastName || !bio || !university || !company || !gender ||
             !workPosition || !workZipcode || !workCity || !internshipStartDate || !internshipEndDate || !schoolMajor) {
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
 
+        // Validate housing preferences if looking for housing
         if (isLookingForHousing && (!sleepSchedule || !numOfRoomates || !noiseLevel || !budgetRange)) {
             return res.status(400).json({ error: 'Housing preferences are required when looking for roommates' });
         }
 
-        // Update user profile
+        // Update user profile using userId (primary key)
         const updatedProfile = await prisma.user.update({
-            where: { clerkId: clerkUserId },
+            where: { userId: existingUser.userId },
             data: {
                 firstName,
                 lastName,
@@ -70,6 +90,7 @@ const createProfile = async (req, res) => {
                 company,
                 workPosition,
                 workZipcode,
+                workCity,
                 internshipStartDate: new Date(internshipStartDate),
                 internshipEndDate: new Date(internshipEndDate),
                 schoolMajor,
@@ -82,14 +103,13 @@ const createProfile = async (req, res) => {
                 instagram,
                 linkedin,
                 facebook
-                //TRAITS AND HOBBIES GO HERE IF NEEDED
             }
         });
 
         res.status(201).json(updatedProfile);
     } catch (error) {
-        console.error("Could not create new profile: ", error);
-        res.status(500).json({ error: 'failed to complete profile' });
+        console.error("Could not create/update profile: ", error);
+        res.status(500).json({ error: 'Failed to complete profile' });
     }
 };
 
@@ -117,10 +137,11 @@ const getProfileById = async (req, res) => {
         });
 
         if (!profile) {
-            return res.status(404).json({ error: 'could not find profile' });
+            return res.status(404).json({ error: 'Could not find profile' });
         }
+        
         if (!profile.profileCompleted) {
-            return res.status(404).json({ error: 'profile not completed' });
+            return res.status(404).json({ error: 'Profile not completed' });
         }
 
         const publicProfile = {
@@ -146,12 +167,13 @@ const getProfileById = async (req, res) => {
             hobbies: profile.userHobbies.map(uh => uh.hobby),
             events: profile.events
         };
+        
         res.json(publicProfile);
     } catch (error) {
-        console.error("Could not retrieve profile: ", error)
-        res.status(500).json({ error: 'failed to retrieve profile' });
+        console.error("Could not retrieve profile: ", error);
+        res.status(500).json({ error: 'Failed to retrieve profile' });
     }
-}
+};
 
 const getProfiles = async (req, res) => {
     try {
@@ -188,10 +210,11 @@ const getProfiles = async (req, res) => {
             traits: profile.userTraits.map(ut => ut.trait),
             hobbies: profile.userHobbies.map(uh => uh.hobby)
         }));
+        
         res.json(publicProfiles);
     } catch (error) {
-        console.error('could not retrieve profiles:', error);
-        res.status(500).json({ error: 'failed to retrieve profiles' });
+        console.error('Could not retrieve profiles:', error);
+        res.status(500).json({ error: 'Failed to retrieve profiles' });
     }
 };
 
@@ -203,7 +226,7 @@ const getCurrentUserProfile = async (req, res) => {
     }
 
     try {
-        const profile = await prisma.user.findUnique({
+        const profile = await prisma.user.findFirst({
             where: { clerkId: clerkUserId },
             include: {
                 userTraits: {
@@ -222,13 +245,15 @@ const getCurrentUserProfile = async (req, res) => {
                 }
             }
         });
+        
         if (!profile) {
             return res.status(404).json({ error: 'Profile not found' });
         }
+        
         res.json(profile);
     } catch (error) {
         console.error('Could not retrieve profile: ', error);
-        res.status(500).json({ error: 'failed to retrieve profile' });
+        res.status(500).json({ error: 'Failed to retrieve profile' });
     }
 };
 
@@ -250,27 +275,28 @@ const updateCurrentUserProfile = async (req, res) => {
         budgetRange,
         sleepSchedule,
         noiseLevel,
+        numOfRoomates,
         instagram,
         linkedin,
         facebook
     } = req.body;
 
     if (!clerkUserId) {
-        return res.status(401).json({ error: 'user not authenticated' });
+        return res.status(401).json({ error: 'User not authenticated' });
     }
 
     try {
-        const existingProfile = await prisma.user.findUnique({
+        const existingProfile = await prisma.user.findFirst({
             where: { clerkId: clerkUserId }
         });
 
         if (!existingProfile) {
-            return res.status(404).json({ error: 'profile not found' });
+            return res.status(404).json({ error: 'Profile not found' });
         }
 
         const updateData = {};
 
-        // Makes sure user fills out actual info
+        // Only update fields that are provided
         if (university !== undefined) updateData.university = university;
         if (company !== undefined) updateData.company = company;
         if (schoolMajor !== undefined) updateData.schoolMajor = schoolMajor;
@@ -289,18 +315,21 @@ const updateCurrentUserProfile = async (req, res) => {
         if (isLookingForHousing !== undefined) {
             updateData.isLookingForHousing = isLookingForHousing;
             if (!isLookingForHousing) {
+                // Clear housing preferences if not looking for housing
                 updateData.budgetRange = null;
                 updateData.sleepSchedule = null;
                 updateData.noiseLevel = null;
                 updateData.numOfRoomates = null;
             }
         }
+        
         if (budgetRange !== undefined) updateData.budgetRange = budgetRange;
         if (sleepSchedule !== undefined) updateData.sleepSchedule = sleepSchedule;
         if (noiseLevel !== undefined) updateData.noiseLevel = noiseLevel;
+        if (numOfRoomates !== undefined) updateData.numOfRoomates = numOfRoomates;
 
         const updatedProfile = await prisma.user.update({
-            where: { clerkId: clerkUserId },
+            where: { userId: existingProfile.userId },
             data: updateData,
             include: {
                 userTraits: {
@@ -315,34 +344,46 @@ const updateCurrentUserProfile = async (req, res) => {
                 }
             }
         });
+        
         res.json(updatedProfile);
     } catch (error) {
-        console.error('could not update profile:', error);
-        res.status(500).json({ error: 'failed to update profile' });
+        console.error('Could not update profile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
     }
-}
+};
 
 const deleteCurrentUserProfile = async (req, res) => {
     const { userId: clerkUserId } = req.auth;
 
     if (!clerkUserId) {
-        return res.status(401).json({ error: 'user not authenticated' });
+        return res.status(401).json({ error: 'User not authenticated' });
     }
 
     try {
-        const deletedProfile = await prisma.user.delete({
+        // First find the user by clerkId
+        const existingProfile = await prisma.user.findFirst({
             where: { clerkId: clerkUserId }
         });
 
+        if (!existingProfile) {
+            return res.status(404).json({ error: 'Profile not found' });
+        }
+
+        // Delete using userId (primary key)
+        const deletedProfile = await prisma.user.delete({
+            where: { userId: existingProfile.userId }
+        });
+
+        // Delete from Clerk as well
         await clerkClient.users.deleteUser(clerkUserId);
 
         console.log('Profile deleted: ', deletedProfile.userId);
-        res.status(204).end()
+        res.status(204).end();
     } catch (error) {
-        console.error('could not delete profile: ', error);
-        res.status(500).json({ error: 'failed to delete profile' });
+        console.error('Could not delete profile: ', error);
+        res.status(500).json({ error: 'Failed to delete profile' });
     }
-}
+};
 
 module.exports = {
     createProfile,
@@ -351,5 +392,4 @@ module.exports = {
     getCurrentUserProfile,
     updateCurrentUserProfile,
     deleteCurrentUserProfile,
-}
-
+};
