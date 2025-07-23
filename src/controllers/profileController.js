@@ -163,8 +163,8 @@ const getProfileById = async (req, res) => {
             numOfRoomates: profile.isLookingForHousing ? profile.numOfRoomates : null,
             noiseLevel: profile.isLookingForHousing ? profile.noiseLevel : null,
             budgetRange: profile.isLookingForHousing ? profile.budgetRange : null,
-            traits: profile.userTraits.map(ut => ut.trait),
-            hobbies: profile.userHobbies.map(uh => uh.hobby),
+            traits: profile.userTraits.map(ut => ut.trait.trait),
+            hobbies: profile.userHobbies.map(uh => uh.hobby.hobby),
             events: profile.events
         };
         
@@ -207,8 +207,8 @@ const getProfiles = async (req, res) => {
             workCity: profile.workCity,
             schoolMajor: profile.schoolMajor,
             isLookingForHousing: profile.isLookingForHousing,
-            traits: profile.userTraits.map(ut => ut.trait),
-            hobbies: profile.userHobbies.map(uh => uh.hobby)
+            traits: profile.userTraits.map(ut => ut.trait.trait),
+            hobbies: profile.userHobbies.map(ut => ut.hobby.hobby),
         }));
         
         res.json(publicProfiles);
