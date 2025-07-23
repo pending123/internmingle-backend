@@ -3,7 +3,7 @@ const prisma = require("../db/prismaClient");
 //Returns events based on sorting and filtering
 const getEvents = async (req, res) => {
   const { category, searchTerm } = req.query;
-  const limit = 20;
+  const limit = 100;
   const skip = 0;
 
   // List / objects of conditions for filtering
@@ -24,6 +24,7 @@ const getEvents = async (req, res) => {
       { title: { contains: searchTerm, mode: "insensitive" } },
       { description: { contains: searchTerm, mode: "insensitive" } },
       { location: { contains: searchTerm, mode: "insensitive" } },
+      { address: { contains: searchTerm, mode: "insensitive" } },
     ];
   }
 
