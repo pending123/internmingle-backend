@@ -8,13 +8,15 @@ const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 const cors = require("cors");
 
 const eventRoutes = require("./src/routes/eventRoutes");
-
+const app = express();
+const PORT = 3000;
 const corsOption = {
   origin: "http://localhost:5173",
 };
+app.use(express.json());
+app.use(cors(corsOption));
 
-const app = express();
-const PORT = 3000;
+
 
 //TEMP__TESTING
 app.post(
@@ -25,8 +27,8 @@ app.post(
 
 //app.use('/api/webhooks', express.raw({ type: 'application/json' }));
 
-app.use(express.json());
-app.use(cors(corsOption));
+
+
 app.use("/", eventRoutes);
 
 //app.post ('/api/webhooks', webhookHandler);

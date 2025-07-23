@@ -1,29 +1,8 @@
 const prisma = require ('../db/prismaClient')
+import { useAuth, useUser} from "@clerk/clerk-react";
 
-// //Returns events based on sorting and filtering
-// const getEvents = async(req,res) =>{
-//     const{category, searchTerm } = req.query
-//     const filters ={}
+const { isSignedIn, user, isLoaded } = useUser();
 
-//     if(category){//Need to first add in recent conditional statement
-//         filters.category = category
-//     }
-//     if(searchTerm){
-//         filters.searchTerm = searchTerm
-//     }
-//     try{
-//         const events = await prisma.event.findMany({
-//             where: filters,
-//             orderBy: { dateTime: 'asc' },
-//             dateTime: { gte: new Date() }
-//         });
-//         res.json(events);
-//     }catch(error){
-//         console.error("Error Fetching events: ", error)
-//     }
-// }
-
-//Returns events based on sorting and filtering
 const getEvents = async(req,res) =>{
     const {category, searchTerm}= req.query
     const limit = 20
@@ -83,6 +62,12 @@ const getEventById = async(req,res) =>{
 //Creates new event
 const createEvent =async(req, res) =>{
     const{title, category, location, dateTime, description} = req.body
+
+    //Grabing UserId to attach to Event in DB
+    const {userId: clerkUserId} =req.auth()
+    const user = await prisma.user.findFirst({
+        where:{clerkId: clerkUserId} 
+    })
     try{
         const newEvent= await prisma.event.create({
             data:{
@@ -90,7 +75,8 @@ const createEvent =async(req, res) =>{
                 category,
                 location,
                 dateTime,
-                description
+                description,
+                userId: user.userId 
             }
         })
         res.json(newEvent)
