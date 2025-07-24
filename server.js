@@ -6,11 +6,8 @@ const { clerkClient, requireAuth, getAuth } = require("@clerk/express");
 const neighborhoodRoutes = require("./src/routes/neighborhoodRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
+
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
-
-const cors = require("cors");
-
-const eventRoutes = require("./src/routes/eventRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +19,10 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (like Postman or curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -43,7 +43,6 @@ app.post(
 //app.use('/api/webhooks', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
-app.use(cors(corsOption));
 app.use(eventRoutes);
 
 //app.post ('/api/webhooks', webhookHandler);
