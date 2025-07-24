@@ -7,7 +7,7 @@ const profileController = require('../controllers/profileController');
 router.post('/', requireAuth(), profileController.createProfile);
 
 //get all profiles with filtering--IDK IF REQUIRE AUTH OR NOT BC you want to be able to access other ppls
-router.get('/', profileController.getProfiles);
+router.get('/', requireAuth(), profileController.getProfiles);
 
 //get my profile
 router.get('/me', requireAuth(), profileController.getCurrentUserProfile);
