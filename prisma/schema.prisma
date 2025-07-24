@@ -74,14 +74,14 @@ model Event {
 
 model Trait{
     traitId             Int         @id @default(autoincrement())
-    trait               String
+    trait               String      @unique
     
     userTraits          UserTrait[]
 }
 
 model Hobby{
     hobbyId             Int         @id @default(autoincrement())
-    hobby               String
+    hobby               String      @unique
     
     userHobbies         UserHobby[]
 }
