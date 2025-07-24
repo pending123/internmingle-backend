@@ -53,6 +53,11 @@ app.use(eventRoutes);
 
 //app.post ('/api/webhooks', webhookHandler);
 
+app.use("/api/profiles", profileRoutes);
+app.use("/api/neighborhoods", neighborhoodRoutes);
+app.use("/", eventRoutes);
+
+
 app.get("/protected", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req);
   res.json({ userId });
