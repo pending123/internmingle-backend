@@ -1,3 +1,4 @@
+const { messageInRaw } = require('svix');
 const prisma = require('../db/prismaClient')
 const { clerkClient } = require('@clerk/express')
 
@@ -119,12 +120,12 @@ const getProfileById = async (req, res) => {
         const profile = await prisma.user.findUnique({
             where: { userId: parseInt(id) },
             include: {
-                userTraits: {
+                traits: {
                     include: {
                         trait: true
                     }
                 },
-                userHobbies: {
+                hobbies: {
                     include: {
                         hobby: true
                     }
@@ -163,8 +164,8 @@ const getProfileById = async (req, res) => {
             numOfRoomates: profile.isLookingForHousing ? profile.numOfRoomates : null,
             noiseLevel: profile.isLookingForHousing ? profile.noiseLevel : null,
             budgetRange: profile.isLookingForHousing ? profile.budgetRange : null,
-            traits: profile.userTraits.map(ut => ut.trait.trait),
-            hobbies: profile.userHobbies.map(uh => uh.hobby.hobby),
+            traits: profile.traits.map(ut => ut.trait.trait),
+            hobbies: profile.hobbies.map(uh => uh.hobby.hobby),
             events: profile.events
         };
         
@@ -177,25 +178,77 @@ const getProfileById = async (req, res) => {
 
 const getProfiles = async (req, res) => {
     try {
-        const profiles = await prisma.user.findMany({
-            where: {
-                profileCompleted: true
-            },
-            include: {
-                userTraits: {
-                    include: {
-                        trait: true
-                    }
-                },
-                userHobbies: {
-                    include: {
-                        hobby: true
-                    }
-                }
-            },
+        const { userId: clerkUserId } = req.auth();
+        const { traits, hobbies, company, page = 1 } = req.query;
+
+        const pageNumber = parseInt(page, 10);
+        const pageSize = 20;
+        const skip = (pageNumber - 1) * pageSize;
+
+
+        if (!clerkUserId ) return res.status(401).json({message: 'Unauthorized'})
+        const currentUser = await prisma.user.findUnique({
+            where: { clerkId: clerkUserId },
+            select: { userId: true }, 
         });
 
-        const publicProfiles = profiles.map(profile => ({
+        
+        if (!currentUser) return res.status(401).json({message: 'User not found'});
+
+        const traitList = traits?.split(',') ?? [];
+        const hobbiesList = hobbies?.split(',') ?? [];
+
+        //Shared filter Condition
+        const filters = {
+            userId: { not: currentUser.userId },
+            profileCompleted: true,
+            ...(company && { company }),
+            ...(traitList.length > 0 && {
+                traits: {
+                    some: {
+                        trait: {
+                            trait: { in: traitList },
+                        },
+                    },
+                },
+            }),
+            ...(hobbiesList.length > 0 && {
+                hobbies: {
+                    some: {
+                        hobby: {
+                            hobby: { in: hobbiesList },
+                        },
+                    },
+                },
+            }),
+        };
+
+        const [profiles, totalCount] = await Promise.all([
+            prisma.user.findMany({
+                where: filters,
+                include: {
+                    traits: { include: { trait: true } },
+                    hobbies: { include: { hobby: true } },
+                },
+                skip,
+                take: pageSize,
+            }),
+            prisma.user.count({ where: filters }),
+        ]);
+
+        const filteredProfiles = profiles.filter(profile => {
+            const userTraits = profile.traits.map(t =>t.trait.trait);
+            const userHobbies = profile.hobbies.map(h => h.hobby.hobby)
+            const matchesTraits = traitList.every((trait) => 
+                userTraits.includes(trait)
+            );
+            const matchesHobbies = hobbiesList.every((hobby) => 
+                userHobbies.includes(hobby)
+            );
+            return matchesTraits && matchesHobbies
+        })
+
+        const publicProfiles = filteredProfiles.map(profile => ({
             userId: profile.userId,
             firstName: profile.firstName,
             lastName: profile.lastName,
@@ -207,11 +260,17 @@ const getProfiles = async (req, res) => {
             workCity: profile.workCity,
             schoolMajor: profile.schoolMajor,
             isLookingForHousing: profile.isLookingForHousing,
-            traits: profile.userTraits.map(ut => ut.trait.trait),
-            hobbies: profile.userHobbies.map(ut => ut.hobby.hobby),
+            traits: profile.traits.map(ut => ut.trait.trait),
+            hobbies: profile.hobbies.map(ut => ut.hobby.hobby),
         }));
         
-        res.json(publicProfiles);
+        res.json({
+            currentPage: pageNumber,
+            totalPages: Math.ceil(totalCount / pageSize),
+            totalResults: totalCount,
+            results: publicProfiles,
+        });
+
     } catch (error) {
         console.error('Could not retrieve profiles:', error);
         res.status(500).json({ error: 'Failed to retrieve profiles' });
@@ -229,12 +288,12 @@ const getCurrentUserProfile = async (req, res) => {
         const profile = await prisma.user.findFirst({
             where: { clerkId: clerkUserId },
             include: {
-                userTraits: {
+                traits: {
                     include: {
                         trait: true
                     }
                 },
-                userHobbies: {
+                hobbies: {
                     include: {
                         hobby: true
                     }
