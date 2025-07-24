@@ -1,8 +1,11 @@
 require("dotenv/config");
 const express = require("express");
+const cors = require("cors");
 const { clerkClient, requireAuth, getAuth } = require("@clerk/express");
+
 const neighborhoodRoutes = require("./src/routes/neighborhoodRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
+const eventRoutes = require("./src/routes/eventRoutes");
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 
 const cors = require("cors");
@@ -15,9 +18,27 @@ const corsOption = {
 };
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3000;
 
-//TEMP__TESTING
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://internmingle.tech"
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
 app.post(
   "/api/webhooks",
   express.raw({ type: "application/json" }),
@@ -37,13 +58,10 @@ app.get("/protected", requireAuth(), async (req, res) => {
   res.json({ userId });
 });
 
-app.use("/api/profiles", profileRoutes);
-app.use("/api/neighborhoods", neighborhoodRoutes);
-
 app.get("/", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req);
   const user = await clerkClient.users.getUser(userId);
-  return res.json({ user });
+  res.json({ user });
 });
 
 app.listen(PORT, () => {
