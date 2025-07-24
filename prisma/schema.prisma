@@ -62,6 +62,7 @@ model Forum {
 
 model Event {
   eventId     Int      @id @default(autoincrement())
+  title       String
   category    String
   location    String
   dateTime    DateTime

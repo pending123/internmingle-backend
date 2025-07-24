@@ -8,6 +8,15 @@ const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 
+const cors = require("cors");
+
+const eventRoutes = require("./src/routes/eventRoutes");
+
+const corsOption = {
+  origin: "http://localhost:5173",
+  credentials: true, //test
+};
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -36,9 +45,13 @@ app.post(
   webhookHandler
 );
 
-app.use("/api/profiles", profileRoutes);
-app.use("/api/neighborhoods", neighborhoodRoutes);
-app.use("/", eventRoutes);
+//app.use('/api/webhooks', express.raw({ type: 'application/json' }));
+
+app.use(express.json());
+app.use(cors(corsOption));
+app.use(eventRoutes);
+
+//app.post ('/api/webhooks', webhookHandler);
 
 app.get("/protected", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req);
@@ -52,5 +65,5 @@ app.get("/", requireAuth(), async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Testing on ${PORT} `);
 });
