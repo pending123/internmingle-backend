@@ -11,11 +11,11 @@ const eventRoutes = require("./src/routes/eventRoutes");
 
 const corsOption = {
   origin: "http://localhost:5173",
-  credentials: true //test
+  credentials: true, //test
 };
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 //TEMP__TESTING
 app.post(
@@ -28,7 +28,7 @@ app.post(
 
 app.use(express.json());
 app.use(cors(corsOption));
-app.use("/", eventRoutes);
+app.use(eventRoutes);
 
 //app.post ('/api/webhooks', webhookHandler);
 
@@ -47,5 +47,5 @@ app.get("/", requireAuth(), async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Testing on ${PORT} `)
+  console.log(`Testing on ${PORT} `);
 });
