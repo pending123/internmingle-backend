@@ -1,5 +1,4 @@
 const prisma = require("../db/prismaClient");
-const prisma = require("../db/prismaClient");
 
 //Returns events based on sorting and filtering
 const getEvents = async (req, res) => {

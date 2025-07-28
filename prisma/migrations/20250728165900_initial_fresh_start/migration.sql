@@ -94,6 +94,9 @@ CREATE TABLE "UserHobby" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
+
+-- CreateIndex
 CREATE INDEX "User_clerkId_idx" ON "User"("clerkId");
 
 -- CreateIndex
@@ -101,6 +104,12 @@ CREATE INDEX "User_workCity_idx" ON "User"("workCity");
 
 -- CreateIndex
 CREATE INDEX "User_isLookingForHousing_idx" ON "User"("isLookingForHousing");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Trait_trait_key" ON "Trait"("trait");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Hobby_hobby_key" ON "Hobby"("hobby");
 
 -- AddForeignKey
 ALTER TABLE "Forum" ADD CONSTRAINT "Forum_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
