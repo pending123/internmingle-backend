@@ -10,7 +10,7 @@ datasource db {
 
 model User{
     userId              Int     @id @default(autoincrement())
-    clerkId             String
+    clerkId             String  @unique
     profileCompleted    Boolean?   @default(false)
     firstName           String?
     lastName            String?
@@ -37,8 +37,8 @@ model User{
     forums              Forum[]
     events              Event[]   
 
-    userTraits            UserTrait[]  
-    userHobbies           UserHobby[]  
+    traits            UserTrait[]  
+    hobbies           UserHobby[]  
 
 
     @@index([clerkId])
@@ -79,14 +79,14 @@ model Event {
 
 model Trait{
     traitId             Int         @id @default(autoincrement())
-    trait               String
+    trait               String      @unique
     
     userTraits          UserTrait[]
 }
 
 model Hobby{
     hobbyId             Int         @id @default(autoincrement())
-    hobby               String
+    hobby               String      @unique
     
     userHobbies         UserHobby[]
 }
