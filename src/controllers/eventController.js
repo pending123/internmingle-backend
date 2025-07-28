@@ -23,7 +23,7 @@ const getEvents = async (req, res) => {
     whereConditions.OR = [
       { title: { contains: searchTerm, mode: "insensitive" } },
       { description: { contains: searchTerm, mode: "insensitive" } },
-      { location: { contains: searchTerm, mode: "insensitive" } }
+      { location: { contains: searchTerm, mode: "insensitive" } },
     ];
   }
 
@@ -35,9 +35,27 @@ const getEvents = async (req, res) => {
       orderBy: orderDate,
       take: limit,
       skip: skip,
-      distinct: ['eventId']
+      distinct: ["eventId"],
+      select: {
+        eventId: true,
+        title: true,
+        category: true,
+        location: true,
+        dateTime: true,
+        description: true,
+        imgUrl: true,
+        userId: true,
+        location: true,
+        latitude: true,
+        longitude: true,
+        placeId: true,
+        placeName: true,
+      },
     });
-    console.log("Backend returned events (length, data):", events.length, events)
+    console.log(
+      "Backend returned events (length, data):",events.length, events
+    );
+
     res.json(events);
   } catch (error) {
     console.error("Error fetching boards: ", error);
@@ -50,6 +68,14 @@ const getEventById = async (req, res) => {
   try {
     const event = await prisma.event.findUnique({
       where: { eventId: parseInt(id) },
+      include: {
+        user: {
+          select: {
+            userId: true,
+            clerkId: true,
+          },
+        },
+      },
     });
     res.json(event);
   } catch (error) {
@@ -59,8 +85,18 @@ const getEventById = async (req, res) => {
 
 //Creates new event
 const createEvent = async (req, res) => {
-  const { title, category, location, dateTime, description } = req.body;
-  console.log("Method Called");
+  const {
+    title,
+    category,
+    location,
+    dateTime,
+    description,
+    imgUrl,
+    latitude,
+    longitude,
+    placeId,
+    placeName,
+  } = req.body;
 
   const eventDateTime = new Date(dateTime);
   try {
@@ -74,8 +110,6 @@ const createEvent = async (req, res) => {
       return res.status(404).json({ error: "User not found in database" });
     }
 
-    console.log("User Profile found");
-
     const newEvent = await prisma.event.create({
       data: {
         title,
@@ -83,7 +117,12 @@ const createEvent = async (req, res) => {
         location,
         dateTime: eventDateTime,
         description,
+        imgUrl,
         userId: user.userId,
+        latitude,
+        longitude,
+        placeId,
+        placeName,
       },
     });
     console.log(newEvent);

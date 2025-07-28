@@ -1,9 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ALTER COLUMN "company" DROP NOT NULL,
-ALTER COLUMN "workPosition" DROP NOT NULL,
-ALTER COLUMN "workZipcode" DROP NOT NULL,
-ALTER COLUMN "internshipStartDate" DROP NOT NULL,
-ALTER COLUMN "internshipEndDate" DROP NOT NULL,
-ALTER COLUMN "schoolMajor" DROP NOT NULL,
-ALTER COLUMN "isLookingForHousing" DROP NOT NULL,
-ALTER COLUMN "workCity" DROP NOT NULL;
