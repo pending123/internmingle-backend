@@ -23,7 +23,7 @@ const getEvents = async (req, res) => {
     whereConditions.OR = [
       { title: { contains: searchTerm, mode: "insensitive" } },
       { description: { contains: searchTerm, mode: "insensitive" } },
-      { location: { contains: searchTerm, mode: "insensitive" } }
+      { location: { contains: searchTerm, mode: "insensitive" } },
     ];
   }
 
