@@ -9,8 +9,14 @@ const neighborhoodRoutes = require("./src/routes/neighborhoodRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
 const messageRoutes = require("./src/routes/messageRoutes");
-
+const photoRoutes = require("./src/routes/photoRoutes")
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
+const placesRoutes = require('./src/routes/eventPlacesRoutes')
+
+const corsOption = {
+  origin: "http://localhost:5173",
+  credentials: true, //test
+};
 
 const app = express();
 
@@ -41,7 +47,7 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -61,7 +67,7 @@ app.post(
 
 //app.use('/api/webhooks', express.raw({ type: 'application/json' }));
 
-app.use(express.json());
+
 app.use(eventRoutes);
 
 //app.post ('/api/webhooks', webhookHandler);
@@ -69,8 +75,8 @@ app.use(eventRoutes);
 app.use("/api/profiles", profileRoutes);
 app.use("/api/neighborhoods", neighborhoodRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/", eventRoutes);
-
+app.use('/api/photos', photoRoutes);
+app.use('/api/places', placesRoutes);
 
 app.get("/protected", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req);
