@@ -25,7 +25,9 @@ const createProfile = async (req, res) => {
         budgetRange,
         instagram,
         linkedin,
-        facebook
+        facebook,
+        traitIds,
+        hobbyIds  
     } = req.body;
 
     const { userId: clerkUserId } = req.auth();
@@ -103,9 +105,46 @@ const createProfile = async (req, res) => {
                 profileCompleted: true,
                 instagram,
                 linkedin,
-                facebook
+                facebook, 
             }
         });
+
+
+        // --- Handle Traits (Many-to-Many with Preset List) ---
+        // 1. Delete all existing UserTrait entries for this user
+        await prisma.userTrait.deleteMany({
+            where: { userId: updatedProfile.userId }
+        });
+
+        // 2. Create new UserTrait entries based on provided traitIds
+        if (traitIds && traitIds.length > 0) {
+            const traitConnects = traitIds.map(traitId => ({
+                userId: updatedProfile.userId,
+                traitId: traitId
+            }));
+            await prisma.userTrait.createMany({
+                data: traitConnects,
+                skipDuplicates: true // Good practice
+            });
+        }
+
+        // --- Handle Hobbies (Many-to-Many with Preset List - similar logic) ---
+        // 1. Delete all existing UserHobby entries for this user
+        await prisma.userHobby.deleteMany({
+            where: { userId: updatedProfile.userId }
+        });
+
+        // 2. Create new UserHobby entries based on provided hobbyIds
+        if (hobbyIds && hobbyIds.length > 0) {
+            const hobbyConnects = hobbyIds.map(hobbyId => ({
+                userId: updatedProfile.userId,
+                hobbyId: hobbyId
+            }));
+            await prisma.userHobby.createMany({
+                data: hobbyConnects,
+                skipDuplicates: true
+            });
+        }
 
         res.status(201).json(updatedProfile);
     } catch (error) {
