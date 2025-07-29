@@ -3,7 +3,17 @@ const prisma = require("../db/prismaClient");
 // Get message history between two users
 exports.getMessageHistory = async (req, res) => {
   try {
-    const { userId1, userId2 } = req.query; 
+    const { userId: clerkUserId } = req.auth();
+
+    if (!clerkUserId ) return res.status(401).json({message: 'Unauthorized'})
+    const currentUser = await prisma.user.findUnique({
+          where: { clerkId: clerkUserId },
+          select: { userId: true }, 
+    });
+
+    const userId1 = currentUser.userId;
+
+    const { userId2 } = req.query; 
     
     if (!userId1 || !userId2) {
       return res.status(400).json({
@@ -92,9 +102,17 @@ exports.sendMessage = async (req, res) => {
 };
 
 //Get a list of people a user has chatted with
-exports.getConversations = async (req, res) => {
+exports.getConversationPartners = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId: clerkUserId } = req.auth();
+
+    if (!clerkUserId ) return res.status(401).json({message: 'Unauthorized'})
+    const currentUser = await prisma.user.findUnique({
+          where: { clerkId: clerkUserId },
+          select: { userId: true }, 
+    });
+
+    const userId = currentUser.userId;
     
     // Get all messages involving this user
     const messages = await prisma.message.findMany({
@@ -104,40 +122,37 @@ exports.getConversations = async (req, res) => {
           { receiverId: parseInt(userId) }
         ]
       },
+      orderBy: { createdAt: 'desc' },
       include: {
-        sender: { select: { userId: true, firstName: true } },
-        receiver: { select: { userId: true, firstName: true } }
+        sender: { select: { userId: true, firstName: true, lastName: true} },
+        receiver: { select: { userId: true, firstName: true, lastName: true } },
       },
-      orderBy: { createdAt: 'desc' }
     });
 
     // Process to get unique conversations with last message
-    const conversationMap = new Map();
-    
-    messages.forEach(message => {
-      const otherUserId = message.senderId === parseInt(userId) 
-        ? message.receiverId 
-        : message.senderId;
-      
-      const otherUser = message.senderId === parseInt(userId)
-        ? message.receiver
-        : message.sender;
+    const conversations = new Map();
 
-      if (!conversationMap.has(otherUserId)) {
-        conversationMap.set(otherUserId, {
-          user: otherUser,
-          lastMessage: message,
-          lastMessageTime: message.createdAt
+    for (const msg of messages) {
+      const isSender = msg.sender.userId == userId;
+      const partner = isSender ? msg.receiver : msg.sender;
+      const partnerId = partner.userId;
+
+      if (!conversations.has(partnerId)) {
+        conversations.set(partnerId, {
+          partner, 
+          lastMessage: msg, 
+          unreadCount: 0
         });
       }
-    });
 
-    const conversations = Array.from(conversationMap.values());
+      if (!isSender && msg.read === false) {
+        conversations.get(partnerId).unreadCount += 1
+      }
+    }
 
-    res.status(200).json({
-      success: true,
-      conversations
-    });
+    const conversationPartners = Array.from(conversations.values());
+
+    res.status(200).json(conversationPartners);
   } catch (error) {
     res.status(500).json({
       success: false,

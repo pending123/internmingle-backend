@@ -86,7 +86,6 @@ app.get("/", requireAuth(), async (req, res) => {
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  // User joins their personal room
   socket.on('joinUser', (userId) => {
     socket.join(`user_${userId}`);
     socket.userId = userId;
@@ -98,7 +97,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// CHANGE THIS LINE:
 server.listen(PORT, () => {
-  console.log(`Testing on ${PORT}`);
+  console.log(`Server running on ${PORT}`);
 });
