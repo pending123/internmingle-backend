@@ -1,15 +1,28 @@
 require("dotenv/config");
 const express = require("express");
+const http = require("http");
+const socketIo = require("socket.io");
 const cors = require("cors");
 const { clerkClient, requireAuth, getAuth } = require("@clerk/express");
 
 const neighborhoodRoutes = require("./src/routes/neighborhoodRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
+const messageRoutes = require("./src/routes/messageRoutes");
 
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 
 const app = express();
+
+const server = http.createServer(app);
+
+const io = socketIo(server, {
+  cors: {
+    origin: ["http://localhost:5173", "https://internmingle.tech"],
+    credentials: true
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
@@ -34,6 +47,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+
 app.post(
   "/api/webhooks",
   express.raw({ type: "application/json" }),
@@ -49,6 +68,7 @@ app.use(eventRoutes);
 
 app.use("/api/profiles", profileRoutes);
 app.use("/api/neighborhoods", neighborhoodRoutes);
+app.use("/api/messages", messageRoutes);
 app.use("/", eventRoutes);
 
 
@@ -63,6 +83,22 @@ app.get("/", requireAuth(), async (req, res) => {
   res.json({ user });
 });
 
-app.listen(PORT, () => {
-  console.log(`Testing on ${PORT} `);
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  // User joins their personal room
+  socket.on('joinUser', (userId) => {
+    socket.join(`user_${userId}`);
+    socket.userId = userId;
+    console.log(`User ${userId} joined their room`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// CHANGE THIS LINE:
+server.listen(PORT, () => {
+  console.log(`Testing on ${PORT}`);
 });
