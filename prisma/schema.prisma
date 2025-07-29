@@ -71,7 +71,7 @@ model Forum {
   createdAt   DateTime @default(now())
   upvotes     Int
   userId      Int
-  user        User     @relation(fields: [userId], references: [userId])
+  user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 model Event {
@@ -79,11 +79,15 @@ model Event {
   title       String
   category    String
   location    String
+  latitude    Float?
+  longitude   Float?
+  placeId     String?
+  placeName   String?
   dateTime    DateTime
   imgUrl      String?
   userId      Int
   description String
-  user        User     @relation(fields: [userId], references: [userId])
+  user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 

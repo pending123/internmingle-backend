@@ -8,9 +8,15 @@ const { clerkClient, requireAuth, getAuth } = require("@clerk/express");
 const neighborhoodRoutes = require("./src/routes/neighborhoodRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
-const messageRoutes = require("./src/routes/messageRoutes");
+const photoRoutes = require("./src/routes/photoRoutes")const messageRoutes = require("./src/routes/messageRoutes");
 
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
+const placesRoutes = require('./src/routes/eventPlacesRoutes')
+
+const corsOption = {
+  origin: "http://localhost:5173",
+  credentials: true, //test
+};
 
 const app = express();
 
@@ -27,7 +33,7 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://internmingle.tech"
+  "https://www.internmingle.tech"
 ];
 
 const corsOptions = {
@@ -41,7 +47,7 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -61,7 +67,7 @@ app.post(
 
 //app.use('/api/webhooks', express.raw({ type: 'application/json' }));
 
-app.use(express.json());
+
 app.use(eventRoutes);
 
 //app.post ('/api/webhooks', webhookHandler);
