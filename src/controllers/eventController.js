@@ -53,7 +53,9 @@ const getEvents = async (req, res) => {
       },
     });
     console.log(
-      "Backend returned events (length, data):",events.length, events
+      "Backend returned events (length, data):",
+      events.length,
+      events
     );
 
     res.json(events);

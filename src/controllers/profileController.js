@@ -119,7 +119,7 @@ const createProfile = async (req, res) => {
                 profileCompleted: true,
                 instagram,
                 linkedin,
-                facebook
+                facebook, 
             }
         });
         await prisma.userTrait.deleteMany({
