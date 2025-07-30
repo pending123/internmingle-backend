@@ -179,12 +179,11 @@ const getProfileById = async (req, res) => {
 const getProfiles = async (req, res) => {
     try {
         const { userId: clerkUserId } = req.auth();
-        const { traits, hobbies, company, page = 1 } = req.query;
+        const { traits, hobbies, company, housing, page = 1 } = req.query;
 
         const pageNumber = parseInt(page, 10);
         const pageSize = 20;
         const skip = (pageNumber - 1) * pageSize;
-
 
         if (!clerkUserId ) return res.status(401).json({message: 'Unauthorized'})
         const currentUser = await prisma.user.findUnique({
@@ -195,6 +194,8 @@ const getProfiles = async (req, res) => {
         
         if (!currentUser) return res.status(401).json({message: 'User not found'});
 
+        const housingBool = housing === 'true' ? true : housing === 'false' ? false : null;
+
         const traitList = traits?.split(',') ?? [];
         const hobbiesList = hobbies?.split(',') ?? [];
 
@@ -202,7 +203,15 @@ const getProfiles = async (req, res) => {
         const filters = {
             userId: { not: currentUser.userId },
             profileCompleted: true,
-            ...(company && { company }),
+            ...(housingBool !== null && {
+                isLookingForHousing: housingBool,
+            }),
+            ...(company && { 
+                company: {
+                    contains: company,
+                    mode: 'insensitive',
+                } 
+            }),
             ...(traitList.length > 0 && {
                 traits: {
                     some: {
