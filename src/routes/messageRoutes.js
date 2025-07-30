@@ -6,8 +6,8 @@ const messageController = require('../controllers/messageController');
 // GET /api/messages?userId2=2 
 router.get('/', requireAuth(), messageController.getMessageHistory);
 
-// GET /api/messages/conversations/:userId 
-router.get('/conversations/:userId', requireAuth(), messageController.getConversationPartners);
+// GET /api/messages/conversations
+router.get('/conversations', requireAuth(), messageController.getConversationPartners);
 
 // POST /api/messages 
 router.post('/', requireAuth(), messageController.sendMessage);
