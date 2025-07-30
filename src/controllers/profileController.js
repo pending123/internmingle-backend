@@ -391,12 +391,12 @@ const updateCurrentUserProfile = async (req, res) => {
             where: { userId: existingProfile.userId },
             data: updateData,
             include: {
-                userTraits: {
+                traits: {
                     include: {
                         trait: true
                     }
                 },
-                userHobbies: {
+                hobbies: {
                     include: {
                         hobby: true
                     }
