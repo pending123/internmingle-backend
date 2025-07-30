@@ -22,7 +22,6 @@ const createProfile = async (req, res) => {
         sleepSchedule,
         numOfRoomates,
         noiseLevel,
-        budgetRange,
         instagram,
         linkedin,
         facebook
@@ -67,14 +66,14 @@ const createProfile = async (req, res) => {
             return res.status(400).json({ error: 'Profile already completed' });
         }
 
-        // Validate required fields
+        // Validate required fields --- CHANGE THIS???
         if (!firstName || !lastName || !bio || !university || !company || !gender ||
             !workPosition || !workCity || !internshipStartDate || !internshipEndDate || !schoolMajor) {
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
 
         // Validate housing preferences if looking for housing
-        if (isLookingForHousing && (!sleepSchedule || !numOfRoomates || !noiseLevel || !budgetRange)) {
+        if (isLookingForHousing && (!sleepSchedule || !numOfRoomates || !noiseLevel)) {
             return res.status(400).json({ error: 'Housing preferences are required when looking for roommates' });
         }
 
@@ -99,7 +98,6 @@ const createProfile = async (req, res) => {
                 sleepSchedule: isLookingForHousing ? sleepSchedule : null,
                 numOfRoomates: isLookingForHousing ? numOfRoomates : null,
                 noiseLevel: isLookingForHousing ? noiseLevel : null,
-                budgetRange: isLookingForHousing ? budgetRange : null,
                 profileCompleted: true,
                 instagram,
                 linkedin,
@@ -163,7 +161,6 @@ const getProfileById = async (req, res) => {
             sleepSchedule: profile.isLookingForHousing ? profile.sleepSchedule : null,
             numOfRoomates: profile.isLookingForHousing ? profile.numOfRoomates : null,
             noiseLevel: profile.isLookingForHousing ? profile.noiseLevel : null,
-            budgetRange: profile.isLookingForHousing ? profile.budgetRange : null,
             traits: profile.traits.map(ut => ut.trait.trait),
             hobbies: profile.hobbies.map(uh => uh.hobby.hobby),
             events: profile.events
@@ -331,7 +328,6 @@ const updateCurrentUserProfile = async (req, res) => {
         bio,
         gender,
         isLookingForHousing,
-        budgetRange,
         sleepSchedule,
         noiseLevel,
         numOfRoomates,
@@ -375,14 +371,12 @@ const updateCurrentUserProfile = async (req, res) => {
             updateData.isLookingForHousing = isLookingForHousing;
             if (!isLookingForHousing) {
                 // Clear housing preferences if not looking for housing
-                updateData.budgetRange = null;
                 updateData.sleepSchedule = null;
                 updateData.noiseLevel = null;
                 updateData.numOfRoomates = null;
             }
         }
         
-        if (budgetRange !== undefined) updateData.budgetRange = budgetRange;
         if (sleepSchedule !== undefined) updateData.sleepSchedule = sleepSchedule;
         if (noiseLevel !== undefined) updateData.noiseLevel = noiseLevel;
         if (numOfRoomates !== undefined) updateData.numOfRoomates = numOfRoomates;
