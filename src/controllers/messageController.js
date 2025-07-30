@@ -54,10 +54,14 @@ exports.getMessageHistory = async (req, res) => {
       }
     });
 
-    res.status(200).json({
-      success: true,
-      messages
-    });
+    const formattedMessages = messages.map(msg => ({
+      id: msg.id,
+      text: msg.content,
+      createdAt: msg.createdAt,
+      type: msg.senderId === userId1 ? 'sent' : 'received',
+    }));
+
+    res.status(200).json(formattedMessages);
   } catch (error) {
     console.error('Error fetching message history:', error);
     res.status(500).json({
