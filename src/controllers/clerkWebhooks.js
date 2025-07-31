@@ -48,7 +48,7 @@ const webhookHandler = async (req, res) => {
 
 const handleUserCreated = async (userData) => {
     try {
-        const {id: clerkId, first_name, last_name } = userData;
+        const {id: clerkId, first_name, last_name, image_url } = userData;
 
         console.log(`Processing user.created webhook for Clerk ID: ${clerkId}`);
         console.log('Full user data:', userData); // Add this for debugging
@@ -56,6 +56,7 @@ const handleUserCreated = async (userData) => {
         //for webhook testing
         const firstName = first_name || 'user';
         const lastName = last_name || '';
+        const imageUrl = image_url || null;
 
         //creates basic user when signing up
         //profile will be 100% complete after onboarding
@@ -64,6 +65,7 @@ const handleUserCreated = async (userData) => {
                 clerkId: clerkId,
                 firstName: firstName,
                 lastName: lastName,
+                imageUrl: imageUrl,
                 bio: '',
                 profileCompleted: false
             }
@@ -86,7 +88,8 @@ const handleUserUpdated = async (userData) => {
             where: { clerkId: clerkId },
             data: {
                 firstName: first_name,
-                lastName: last_name
+                lastName: last_name,
+                imageUrl: imageUrl
             }
         });
         console.log(`updated ${result.count} user records for Clerk Id: ${clerkId}`);
