@@ -10,14 +10,8 @@ const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
 const photoRoutes = require("./src/routes/photoRoutes");
 const messageRoutes = require("./src/routes/messageRoutes");
-
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 const placesRoutes = require('./src/routes/eventPlacesRoutes')
-
-const corsOption = {
-  origin: "http://localhost:5173",
-  credentials: true, //test
-};
 
 const app = express();
 
@@ -76,8 +70,8 @@ app.use(eventRoutes);
 app.use("/api/profiles", profileRoutes);
 app.use("/api/neighborhoods", neighborhoodRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/", eventRoutes);
-
+app.use('/api/photos', photoRoutes);
+app.use('/api/places', placesRoutes);
 
 app.get("/protected", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req);

@@ -29,7 +29,6 @@ model User{
     sleepSchedule       String?
     numOfRoomates       Int?
     noiseLevel          String?
-    budgetRange         Int?
     instagram           String?
     linkedin            String?
     github              String?
