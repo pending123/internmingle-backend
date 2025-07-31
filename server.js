@@ -8,6 +8,7 @@ const { clerkClient, requireAuth, getAuth } = require("@clerk/express");
 const neighborhoodRoutes = require("./src/routes/neighborhoodRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
+const photoRoutes = require("./src/routes/photoRoutes");
 const messageRoutes = require("./src/routes/messageRoutes");
 const photoRoutes = require("./src/routes/photoRoutes")
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
