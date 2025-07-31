@@ -10,14 +10,8 @@ const profileRoutes = require("./src/routes/profileRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
 const photoRoutes = require("./src/routes/photoRoutes");
 const messageRoutes = require("./src/routes/messageRoutes");
-const photoRoutes = require("./src/routes/photoRoutes")
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 const placesRoutes = require('./src/routes/eventPlacesRoutes')
-
-const corsOption = {
-  origin: "http://localhost:5173",
-  credentials: true, //test
-};
 
 const app = express();
 
