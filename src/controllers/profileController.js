@@ -2,6 +2,18 @@ const { messageInRaw } = require('svix');
 const prisma = require('../db/prismaClient')
 const { clerkClient } = require('@clerk/express')
 
+
+//gets a user's image from Clerk
+const userPfpFromClerk = async (clerkUserId) => {
+    try {
+        const clerkUser = await clerkClient.users.getUser(clerkUserId);
+        return clerkUser.imageUrl || null;
+    } catch (error) {
+        console.error('Error fetching profile picture from Clerk', error);
+        return null;
+    }
+};
+
 //create user profile-- onboarding
 const createProfile = async (req, res) => {
     const {
@@ -39,6 +51,8 @@ const createProfile = async (req, res) => {
             where: { clerkId: clerkUserId }
         });
 
+        //get user's image URL from Clerk UI
+        const imageUrl = await userPfpFromClerk(clerkUserId);
         // If no existing user, create one (handles webhook failure edge case)
         if (!existingUser) {
             try {
@@ -50,6 +64,7 @@ const createProfile = async (req, res) => {
                         clerkId: clerkUserId,
                         firstName: clerkUser.firstName || '',
                         lastName: clerkUser.lastName || '',
+                        imageUrl: imageUrl,
                         bio: '',
                         profileCompleted: false
                     }
@@ -68,7 +83,7 @@ const createProfile = async (req, res) => {
 
         // Validate required fields --- CHANGE THIS???
         if (!firstName || !lastName || !bio || !university || !company || !gender ||
-            !workPosition || !workCity || !internshipStartDate || !internshipEndDate || !schoolMajor) {
+            !workPosition || !workCity) { //!internshipStartDate || !internshipEndDate || !schoolMajor
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
 
@@ -83,6 +98,7 @@ const createProfile = async (req, res) => {
             data: {
                 firstName,
                 lastName,
+                imageUrl: imageUrl,
                 birthday: birthday ? new Date(birthday) : null,
                 bio,
                 gender,
@@ -91,8 +107,8 @@ const createProfile = async (req, res) => {
                 workPosition,
                 workZipcode: workZipcode || null,
                 workCity,
-                internshipStartDate: new Date(internshipStartDate),
-                internshipEndDate: new Date(internshipEndDate),
+                internshipStartDate: new Date(internshipStartDate) || null, //TESTING
+                internshipEndDate: new Date(internshipEndDate) || null, //TESTING
                 schoolMajor,
                 isLookingForHousing,
                 sleepSchedule: isLookingForHousing ? sleepSchedule : null,
@@ -147,6 +163,7 @@ const getProfileById = async (req, res) => {
             userId: profile.userId,
             firstName: profile.firstName,
             lastName: profile.lastName,
+            imageUrl: profile.imageUrl,
             birthday: profile.birthday,
             bio: profile.bio,
             gender: profile.gender,
@@ -249,6 +266,7 @@ const getProfiles = async (req, res) => {
             userId: profile.userId,
             firstName: profile.firstName,
             lastName: profile.lastName,
+            imageUrl: profile.imageUrl,
             bio: profile.bio,
             gender: profile.gender,
             university: profile.university,
@@ -306,11 +324,21 @@ const getCurrentUserProfile = async (req, res) => {
             return res.status(404).json({ error: 'Profile not found' });
         }
         
+        const latestImageUrl = await userPfpFromClerk(clerkUserId);
+        if (latestImageUrl !== profile.imageUrl) {
+            await prisma.user.update({
+                where: { userId: profile.userId },
+                data: { imageUrl: latestImageUrl }
+            });
+            profile.imageUrl = latestImageUrl;
+        }
+        
         res.json(profile);
     } catch (error) {
         console.error('Could not retrieve profile: ', error);
         res.status(500).json({ error: 'Failed to retrieve profile' });
     }
+
 };
 
 const updateCurrentUserProfile = async (req, res) => {
@@ -349,7 +377,12 @@ const updateCurrentUserProfile = async (req, res) => {
             return res.status(404).json({ error: 'Profile not found' });
         }
 
-        const updateData = {};
+        const updateData = {}
+
+        const latestImageUrl = await userPfpFromClerk(clerkUserId);
+        if (latestImageUrl) {
+            updateData.imageUrl = latestImageUrl;
+        }
 
         // Only update fields that are provided
         if (university !== undefined) updateData.university = university;
@@ -404,6 +437,9 @@ const updateCurrentUserProfile = async (req, res) => {
         res.status(500).json({ error: 'Failed to update profile' });
     }
 };
+
+
+
 
 const deleteCurrentUserProfile = async (req, res) => {
     const { userId: clerkUserId } = req.auth();
