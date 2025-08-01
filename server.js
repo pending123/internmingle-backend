@@ -11,6 +11,10 @@ const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 const placesRoutes = require('./src/routes/eventPlacesRoutes')
 const traitRoutes = require('./src/routes/traitsRoutes')
 const hobbyRoutes = require('./src/routes/hobbiesRoutes');
+const forumRoutes = require('./src/routes/forumRoutes')
+const commentRoutes = require('./src/routes/commentRoutes')
+const upvoteRoutes = require('./src/routes/upvoteRoutes')
+
 
 const corsOption = {
   origin: "http://localhost:5173",
@@ -61,6 +65,9 @@ app.use('/api/photos', photoRoutes);
 app.use('/api/places', placesRoutes);
 app.use('/api', traitRoutes);
 app.use('/api', hobbyRoutes);
+app.use('/api/forums', forumRoutes )
+app.use('/api/forums', commentRoutes)
+app.use('/api/forums', upvoteRoutes)
 
 app.get("/protected", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req);

@@ -3,7 +3,7 @@ const prisma = require("../db/prismaClient");
 exports.getAllTraits = async (req, res) => {
     try {
         const traits = await prisma.trait.findMany({
-            select: { traitId: true, trait: true } // Select both ID and name
+            select: { traitId: true, trait: true } 
         });
         res.json(traits);
     } catch (error) {
