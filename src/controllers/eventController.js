@@ -6,7 +6,6 @@ const getEvents = async (req, res) => {
   const limit = 100;
   const skip = 0;
 
-  // List / objects of conditions for filtering
   const whereConditions = {
     dateTime: {
       // Only shows events occurring from the current date/time into the future
