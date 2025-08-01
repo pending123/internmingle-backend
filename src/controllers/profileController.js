@@ -2,6 +2,9 @@ const { messageInRaw } = require('svix');
 const prisma = require('../db/prismaClient')
 const { clerkClient } = require('@clerk/express')
 
+//helper function for date conversion
+const safeDate = (dateString) => dateString && dateString.trim() ? new Date(dateString) : null;
+
 
 //gets a user's image from Clerk
 const userPfpFromClerk = async (clerkUserId) => {
@@ -82,8 +85,8 @@ const createProfile = async (req, res) => {
         }
 
         // Validate required fields --- CHANGE THIS???
-        if (!firstName || !lastName || !bio || !university || !company || !gender ||
-            !workPosition || !workCity) { //!internshipStartDate || !internshipEndDate || !schoolMajor
+        if (!firstName || !lastName || !bio || !university || !schoolMajor || !company || !gender ||
+            !workPosition || !workCity) { // took out !internshipStartDate || !internshipEndDate 
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
 
@@ -92,6 +95,7 @@ const createProfile = async (req, res) => {
             return res.status(400).json({ error: 'Housing preferences are required when looking for roommates' });
         }
 
+
         // Update user profile using userId (primary key)
         const updatedProfile = await prisma.user.update({
             where: { userId: existingUser.userId },
@@ -99,7 +103,7 @@ const createProfile = async (req, res) => {
                 firstName,
                 lastName,
                 imageUrl: imageUrl,
-                birthday: birthday ? new Date(birthday) : null,
+                birthday: safeDate(birthday),
                 bio,
                 gender,
                 university,
@@ -107,8 +111,8 @@ const createProfile = async (req, res) => {
                 workPosition,
                 workZipcode: workZipcode || null,
                 workCity,
-                internshipStartDate: new Date(internshipStartDate) || null, //TESTING
-                internshipEndDate: new Date(internshipEndDate) || null, //TESTING
+                internshipStartDate: safeDate(internshipStartDate),
+                internshipEndDate: safeDate(internshipEndDate),
                 schoolMajor,
                 isLookingForHousing,
                 sleepSchedule: isLookingForHousing ? sleepSchedule : null,
@@ -388,9 +392,9 @@ const updateCurrentUserProfile = async (req, res) => {
         if (university !== undefined) updateData.university = university;
         if (company !== undefined) updateData.company = company;
         if (schoolMajor !== undefined) updateData.schoolMajor = schoolMajor;
-        if (birthday !== undefined) updateData.birthday = birthday ? new Date(birthday) : null;
-        if (internshipStartDate !== undefined) updateData.internshipStartDate = new Date(internshipStartDate);
-        if (internshipEndDate !== undefined) updateData.internshipEndDate = new Date(internshipEndDate);
+        if (birthday !== undefined) updateData.birthday = safeDate(birthday);
+        if (internshipStartDate !== undefined) updateData.internshipStartDate = safeDate(internshipStartDate);
+        if (internshipEndDate !== undefined) updateData.internshipEndDate = safeDate(internshipEndDate);
         if (workCity !== undefined) updateData.workCity = workCity;
         if (workZipcode !== undefined) updateData.workZipcode = workZipcode;
         if (workPosition !== undefined) updateData.workPosition = workPosition;
