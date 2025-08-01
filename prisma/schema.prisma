@@ -39,13 +39,27 @@ model User{
 
     traits            UserTrait[]  
     hobbies           UserHobby[]  
+    sentMessages      Message[]    @relation("SentMessages")
+    receivedMessages  Message[]    @relation("ReceivedMessages")
 
 
     @@index([clerkId])
     @@index([workCity])
     @@index([isLookingForHousing])
+}
 
+model Message {
+  id            String    @id   @default(cuid())
+  content       String    
+  read          Boolean   @default(false)
 
+  sender        User      @relation("SentMessages", fields: [senderId], references: [userId], onDelete: Cascade)
+  senderId      Int 
+
+  receiver      User      @relation("ReceivedMessages", fields: [receiverId], references: [userId], onDelete: Cascade)
+  receiverId    Int 
+
+  createdAt     DateTime  @default(now())
 }
 
 model Forum {

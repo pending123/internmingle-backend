@@ -87,6 +87,7 @@ const createProfile = async (req, res) => {
         // Validate required fields --- CHANGE THIS???
         if (!firstName || !lastName || !bio || !university || !schoolMajor || !company || !gender ||
             !workPosition || !workCity) { // took out !internshipStartDate || !internshipEndDate 
+
             return res.status(400).json({ error: 'Missing required field(s)' });
         }
 
