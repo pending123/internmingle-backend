@@ -36,6 +36,8 @@ model User{
     facebook            String?
     forums              Forum[]
     events              Event[]   
+    comments            Comment[]
+    upvotes             Upvote[]
 
     traits            UserTrait[]  
     hobbies           UserHobby[]  
@@ -62,17 +64,6 @@ model Message {
   createdAt     DateTime  @default(now())
 }
 
-model Forum {
-  forumId     Int      @id @default(autoincrement())
-  category    String
-  title       String
-  textContent String
-  imgUrl      String?
-  createdAt   DateTime @default(now())
-  upvotes     Int
-  userId      Int
-  user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
-}
 
 model Event {
   eventId     Int      @id @default(autoincrement())
@@ -88,6 +79,39 @@ model Event {
   userId      Int
   description String
   user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+model Forum {
+  forumId     Int      @id @default(autoincrement())
+  title       String
+  textContent String
+  upvoteCount   Int @default(0)
+  commentCount  Int @default(0)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  comments    Comment[]
+  upvotes     Upvote[]
+  createdAt   DateTime @default(now()) 
+}
+
+model Comment{
+  commentId   Int       @id @default(autoincrement())
+  textContent String
+  forumId     Int
+  createdAt   DateTime @default(now()) 
+  userId      Int
+  user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  forum       Forum     @relation(fields: [forumId], references: [forumId], onDelete: Cascade)
+}
+
+model Upvote{
+  upvoteId    Int       @id @default(autoincrement())
+  userId      Int
+  forumId     Int
+  
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  forum       Forum     @relation(fields: [forumId], references: [forumId], onDelete: Cascade)
+  @@unique([userId, forumId])
 }
 
 

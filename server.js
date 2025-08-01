@@ -12,7 +12,8 @@ const photoRoutes = require("./src/routes/photoRoutes");
 const messageRoutes = require("./src/routes/messageRoutes");
 const { webhookHandler } = require("./src/controllers/clerkWebhooks");
 const placesRoutes = require('./src/routes/eventPlacesRoutes')
-
+const traitRoutes = require('./src/routes/traitsRoutes')
+const hobbiesRoutes = require('./src/routes/hobbiesRoutes')
 const app = express();
 const server = http.createServer(app);
 
@@ -77,6 +78,8 @@ app.use("/api/neighborhoods", neighborhoodRoutes);
 app.use("/api/messages", messageRoutes);
 app.use('/api/photos', photoRoutes);
 app.use('/api/places', placesRoutes);
+app.use('/api', traitRoutes);
+app.use('/api', hobbiesRoutes);
 
 app.get("/protected", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req);

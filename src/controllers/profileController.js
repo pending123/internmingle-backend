@@ -39,7 +39,9 @@ const createProfile = async (req, res) => {
         noiseLevel,
         instagram,
         linkedin,
-        facebook
+        facebook,
+        traitIds, 
+        hobbyIds 
     } = req.body;
 
     const { userId: clerkUserId } = req.auth();
@@ -122,9 +124,39 @@ const createProfile = async (req, res) => {
                 profileCompleted: true,
                 instagram,
                 linkedin,
-                facebook
+                facebook, 
             }
         });
+        await prisma.userTrait.deleteMany({
+            where: { userId: updatedProfile.userId }
+        });
+
+        if (traitIds && traitIds.length > 0) {
+            const traitConnects = traitIds.map(traitId => ({
+                userId: updatedProfile.userId,
+                traitId: traitId
+            }));
+            await prisma.userTrait.createMany({
+                data: traitConnects,
+                skipDuplicates: true
+            });
+        }
+
+        await prisma.userHobby.deleteMany({
+            where: { userId: updatedProfile.userId }
+        });
+
+        if (hobbyIds && hobbyIds.length > 0) {
+            const hobbyConnects = hobbyIds.map(hobbyId => ({
+                userId: updatedProfile.userId,
+                hobbyId: hobbyId
+            }));
+            await prisma.userHobby.createMany({
+                data: hobbyConnects,
+                skipDuplicates: true
+            });
+        }
+
 
         res.status(201).json(updatedProfile);
     } catch (error) {
@@ -374,7 +406,9 @@ const updateCurrentUserProfile = async (req, res) => {
         numOfRoomates,
         instagram,
         linkedin,
-        facebook
+        facebook,
+        traitIds,
+        hobbyIds
     } = req.body;
 
     if (!clerkUserId) {
@@ -443,6 +477,34 @@ const updateCurrentUserProfile = async (req, res) => {
                 }
             }
         });
+
+        await prisma.userTrait.deleteMany({
+            where: { userId: updatedProfile.userId }
+        });
+        if (traitIds && traitIds.length > 0) {
+            const traitConnects = traitIds.map(traitId => ({
+                userId: updatedProfile.userId,
+                traitId: traitId
+            }));
+            await prisma.userTrait.createMany({
+                data: traitConnects,
+                skipDuplicates: true
+            });
+        }
+
+        await prisma.userHobby.deleteMany({
+            where: { userId: updatedProfile.userId }
+        });
+        if (hobbyIds && hobbyIds.length > 0) {
+            const hobbyConnects = hobbyIds.map(hobbyId => ({
+                userId: updatedProfile.userId,
+                hobbyId: hobbyId
+            }));
+            await prisma.userHobby.createMany({
+                data: hobbyConnects,
+                skipDuplicates: true
+            });
+        }
         
         res.json(updatedProfile);
     } catch (error) {

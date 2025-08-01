@@ -3,10 +3,9 @@ const prisma = require("../db/prismaClient");
 //Returns events based on sorting and filtering
 const getEvents = async (req, res) => {
   const { category, searchTerm } = req.query;
-  const limit = 20;
+  const limit = 100;
   const skip = 0;
 
-  // List / objects of conditions for filtering
   const whereConditions = {
     dateTime: {
       // Only shows events occurring from the current date/time into the future
@@ -53,7 +52,9 @@ const getEvents = async (req, res) => {
       },
     });
     console.log(
-      "Backend returned events (length, data):",events.length, events
+      "Backend returned events (length, data):",
+      events.length,
+      events
     );
 
     res.json(events);
