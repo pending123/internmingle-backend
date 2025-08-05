@@ -312,6 +312,7 @@ const getProfiles = async (req, res) => {
             userId: profile.userId,
             firstName: profile.firstName,
             lastName: profile.lastName,
+            imageUrl: profile.imageUrl,
             bio: profile.bio,
             gender: profile.gender,
             university: profile.university,
