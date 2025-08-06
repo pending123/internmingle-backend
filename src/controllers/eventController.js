@@ -75,7 +75,9 @@ const getEventById = async (req, res) => {
             userId: true,
             clerkId: true,
             firstName: true, 
-            lastName: true, 
+
+            lastName: true,  
+
           },
         },
       },
