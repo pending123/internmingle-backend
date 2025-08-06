@@ -74,6 +74,8 @@ const getEventById = async (req, res) => {
           select: {
             userId: true,
             clerkId: true,
+            firstName: true, 
+            lastName: true, 
           },
         },
       },
