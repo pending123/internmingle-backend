@@ -15,22 +15,27 @@ const placesRoutes = require('./src/routes/eventPlacesRoutes')
 const traitRoutes = require('./src/routes/traitsRoutes')
 const hobbiesRoutes = require('./src/routes/hobbiesRoutes')
 const app = express();
-
 const server = http.createServer(app);
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://www.internmingle.tech"
+]
 
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://internmingle.tech"],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS (Socket.IO)"));
+      }
+    },
     credentials: true
   }
 });
 
 const PORT = process.env.PORT || 3000;
-
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://www.internmingle.tech"
-];
 
 const corsOptions = {
   origin: function (origin, callback) {
